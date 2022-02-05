@@ -25,6 +25,10 @@ export default function Index() {
       <Link to="/auth/login" color="secondary">
         Login
       </Link>
+      <br />
+      <Link to="/auth/register" color="secondary">
+        Register
+      </Link>
     </React.Fragment>
   );
 }

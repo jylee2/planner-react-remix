@@ -16,11 +16,12 @@ import Button from "@mui/material/Button";
 export const action = async ({ request }: any) => {
   const form = await request.formData();
 
+  const name = form.get("name")
   const email = form.get("email")
   const password = form.get("password")
-  const fields = { email, password }
+  const fields = { name, email, password }
 
-  const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/login`, {
+  const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(fields),
@@ -30,16 +31,17 @@ export const action = async ({ request }: any) => {
   const content = await response.json();
 
   if (content.success) {
-    return redirect("/")
+    return redirect("/auth/login")
   }
 
   return content
 };
 
-const Login = () => {
+const Register = () => {
   const actionData = useActionData()
 
   const [values, setValues] = useState({
+    name: "",
     email: "",
     password: "",
     showPassword: false,
@@ -63,10 +65,21 @@ const Login = () => {
   return (
     <Box>
       <Typography variant="h5" gutterBottom component="div" sx={{ m: 1 }}>
-        Login
+        Register
       </Typography>
 
       <form method="POST">
+        <TextField
+          id="name"
+          label="Name"
+          variant="outlined"
+          type="name"
+          placeholder="John Doe"
+          value={values.name}
+          onChange={handleChange("name")}
+          sx={{ m: 1, width: "100%" }}
+          name="name"
+        />
         <TextField
           id="email"
           label="Email"
@@ -116,18 +129,18 @@ const Login = () => {
           variant="outlined"
           type="submit"
         >
-          Login
+          Register
         </Button>
       </form>
 
 
       <Box sx={{ m: 1 }}>
-        <Link to="/auth/register" color="secondary">
-          Register
+        <Link to="/auth/login" color="secondary">
+          Login
         </Link>
       </Box>
     </Box>
   );
 };
 
-export default Login;
+export default Register;

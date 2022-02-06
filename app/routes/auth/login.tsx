@@ -13,27 +13,29 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Button from "@mui/material/Button";
 
-export const action = async ({ request }: any) => {
+import { login, createUserSession } from "~/utils/auth";
+import { ActionType } from "~/types/types";
+
+export const action = async ({ request }: ActionType) => {
   const form = await request.formData();
 
   const email = form.get("email")
   const password = form.get("password")
-  const fields = { email, password }
-
-  const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(fields),
-  });
-
-
-  const content = await response.json();
-
-  if (content.success) {
-    return redirect("/")
+  if (!email || !password) {
+    return {
+      message: 'Please enter your email and password.'
+    }
   }
 
-  return content
+  const fields = { email, password }
+
+  const res = await login(fields)
+
+  if (res.success) {
+    return createUserSession(res.userUuid, '/')
+  }
+
+  return res
 };
 
 const Login = () => {

@@ -5,11 +5,11 @@ import Link from '@mui/material/Link';
 export default function Copyright() {
   return (
     <Typography variant="body2" color="text.secondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
+      {/* {'Copyright © '} */}
+      <Link color="inherit" href="https://github.com/jylee2/record-react-remix">
+        GitHub
       </Link>{' '}
-      {new Date().getFullYear()}.
+      {/* {new Date().getFullYear()}. */}
     </Typography>
   );
 }

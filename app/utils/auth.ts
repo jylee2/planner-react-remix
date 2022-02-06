@@ -36,6 +36,7 @@ export const login = async (fields: LoginFields) => {
 export const createUserSession = async (userUuid: string, redirectTo: string) => {
   const session = await storage.getSession();
   session.set('userUuid', userUuid)
+  session.set('expires', new Date(Date.now() + 12 * 60 * 60 * 1000)) // 12 hours
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session)
@@ -48,13 +49,18 @@ const getUserSession = (request: Request) => {
 }
 
 export const getLoggedInUser = async (request: Request) => {
-  const session = await getUserSession(request)
-  const userUuid = session.get('userUuid')
-  if (!userUuid || typeof userUuid !== 'string') {
-    return null
-  }
-
   try {
+    const session = await getUserSession(request)
+    const userUuid = session.get('userUuid')
+    if (!userUuid || typeof userUuid !== 'string') {
+      return null
+    }
+
+    const expires = session.get('expires') ? new Date(session.get('expires')).getTime() : null
+    if (expires && Date.now() > expires) {
+      return null
+    }
+
     const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/user/${userUuid}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -64,5 +70,27 @@ export const getLoggedInUser = async (request: Request) => {
     return response.json();
   } catch (error) {
     console.log('--------getLoggedInUser error: ', error)
+  }
+}
+
+export const logout = async (request: Request) => {
+  try {
+    const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: 'include'
+    });
+  
+    await response.json();
+  
+    const session = await storage.getSession(request.headers.get('Cookie'))
+  
+    return redirect('login', {
+      headers: {
+        'Set-Cookie': await storage.destroySession(session)
+      }
+    })
+  } catch (error) {
+    console.log('--------logout error: ', error)
   }
 }

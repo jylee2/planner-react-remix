@@ -66,3 +66,25 @@ export const getLoggedInUser = async (request: Request) => {
     console.log('--------getLoggedInUser error: ', error)
   }
 }
+
+export const logout = async (request: Request) => {
+  try {
+    const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: 'include'
+    });
+  
+    await response.json();
+  
+    const session = await storage.getSession(request.headers.get('Cookie'))
+  
+    return redirect('login', {
+      headers: {
+        'Set-Cookie': await storage.destroySession(session)
+      }
+    })
+  } catch (error) {
+    console.log('--------logout error: ', error)
+  }
+}

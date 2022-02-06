@@ -1,7 +1,9 @@
 import type { MetaFunction } from "remix";
-import { useLoaderData, Link } from "remix";
+import { useLoaderData, redirect, Link } from "remix";
 import { useReducer, useEffect } from 'react'
+
 import Typography from "@mui/material/Typography";
+import Button from '@mui/material/Button';
 
 import Reducer, { initialState } from "../utils/useStoreReducer";
 import { ACTION, ActionType } from "~/types/types";
@@ -15,10 +17,9 @@ export const meta: MetaFunction = () => {
   };
 };
 
-
 export const loader = async ({ request }: ActionType) => {
   const user = await getLoggedInUser(request)
-  return { user }
+  return user ? { user } : redirect("/auth/login")
 }
 
 // https://remix.run/guides/routing#index-routes
@@ -44,13 +45,17 @@ export default function HomePage() {
         Go to the about page
       </Link>
       <br />
-      <Link to="/auth/login" color="secondary">
-        Login
-      </Link>
-      <br />
-      <Link to="/auth/register" color="secondary">
-        Register
-      </Link>
+      {
+        state?.loggedInUser
+          ? <form action="/auth/logout" method="POST">
+            <Button variant="outlined" type="submit">
+              Logout
+            </Button>
+          </form>
+          : <Link to="/auth/login" color="secondary">
+            Login
+          </Link>
+      }
     </>
   );
 }

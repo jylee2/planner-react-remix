@@ -14,12 +14,9 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Button from "@mui/material/Button";
 
 import { login, createUserSession } from "~/utils/auth";
+import { ActionType } from "~/types/types";
 
-type LoginAction = {
-  request: Request
-}
-
-export const action = async ({ request }: LoginAction) => {
+export const action = async ({ request }: ActionType) => {
   const form = await request.formData();
 
   const email = form.get("email")

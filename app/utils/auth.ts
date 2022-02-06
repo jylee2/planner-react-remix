@@ -25,7 +25,6 @@ const storage = createCookieSessionStorage({
 export const login = async (fields: LoginFields) => {
   const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/login`, {
     method: "POST",
-    mode: 'cors',
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(fields),
     credentials: 'include'
@@ -36,7 +35,7 @@ export const login = async (fields: LoginFields) => {
 
 export const createUserSession = async (userUuid: string, redirectTo: string) => {
   const session = await storage.getSession();
-  session.set('uuid', userUuid)
+  session.set('userUuid', userUuid)
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session)
@@ -44,10 +43,26 @@ export const createUserSession = async (userUuid: string, redirectTo: string) =>
   })
 }
 
-export const getUserSession = (request: Request) => {
+const getUserSession = (request: Request) => {
   return storage.getSession(request.headers.get('Cookie'))
 }
 
-export const getLoggedInUser = () => {
+export const getLoggedInUser = async (request: Request) => {
+  const session = await getUserSession(request)
+  const userUuid = session.get('userUuid')
+  if (!userUuid || typeof userUuid !== 'string') {
+    return null
+  }
 
+  try {
+    const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/user/${userUuid}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: 'include'
+    });
+  
+    return response.json();
+  } catch (error) {
+    console.log('--------getLoggedInUser error: ', error)
+  }
 }
